@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 
-from app.engines.wallpaper_math import roll_count
-from app.repositories import history, rolls, walls
+from app.engines.estimate_breakdown import compute_breakdown
+from app.repositories import calc_runs, rolls, walls
 
 
 def run_estimate(wall_id: int, roll_id: int, save: bool, note: str):
@@ -14,10 +14,10 @@ def run_estimate(wall_id: int, roll_id: int, save: bool, note: str):
     if wall.get("data_quality") == "dirty" or roll.get("data_quality") == "dirty":
         raise HTTPException(422, "dirty seed entity")
 
-    calc = roll_count(
+    breakdown = compute_breakdown(
         wall["perimeter"], wall["height"], roll["width"], roll["length"], roll["pattern_cm"]
     )
     run_id = None
     if save:
-        run_id = history.insert_run(wall_id, roll_id, {**calc, "wall_id": wall_id, "roll_id": roll_id}, note)
-    return {"wall": wall, "roll": roll, "run_id": run_id, **calc}
+        run_id = calc_runs.save_breakdown(wall_id, roll_id, breakdown, note)
+    return {"wall": wall, "roll": roll, "run_id": run_id, **breakdown.to_dict()}
