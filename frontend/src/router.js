@@ -7,6 +7,7 @@ import Drops from './pages/Drops.vue'
 import Bench from './pages/Bench.vue'
 import Pattern from './pages/Pattern.vue'
 import History from './pages/History.vue'
+import RunDetail from './pages/RunDetail.vue'
 import Settings from './pages/Settings.vue'
 
 export default createRouter({
@@ -20,6 +21,7 @@ export default createRouter({
     { path: '/bench', component: Bench },
     { path: '/pattern', component: Pattern },
     { path: '/history', component: History },
+    { path: '/history/:id', component: RunDetail, props: true },
     { path: '/settings', component: Settings },
   ],
 })

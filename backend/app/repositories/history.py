@@ -1,20 +1,5 @@
-import json
-from datetime import datetime, timezone
-
 from app.db import connect
-
-
-def insert_run(wall_id: int, roll_id: int, result: dict, note: str = "") -> int:
-    conn = connect()
-    try:
-        cur = conn.execute(
-            "INSERT INTO calc_runs(wall_id,roll_id,result_json,note,created_at) VALUES (?,?,?,?,?)",
-            (wall_id, roll_id, json.dumps(result, ensure_ascii=False), note, datetime.now(timezone.utc).isoformat()),
-        )
-        conn.commit()
-        return int(cur.lastrowid)
-    finally:
-        conn.close()
+from app.repositories.persist import assemble_run
 
 
 def list_runs(limit: int = 50):
@@ -30,11 +15,6 @@ def list_runs(limit: int = 50):
             """,
             (limit,),
         ).fetchall()
-        out = []
-        for row in rows:
-            d = dict(row)
-            d["result"] = json.loads(d.pop("result_json"))
-            out.append(d)
-        return out
+        return [assemble_run(row) for row in rows]
     finally:
         conn.close()
